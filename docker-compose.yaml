@@ -38,6 +38,7 @@ services:
     volumes:
       - ./frontend:/app
       - ./frontend/.env.example:/app/.env
+      - /app/node_modules
     depends_on:
       - backend
     ports:
