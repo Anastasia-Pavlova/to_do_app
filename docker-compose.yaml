@@ -1,0 +1,49 @@
+version: "3.8"
+
+services:
+  postgres:
+    container_name: db
+    image: postgres:16.0-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Admin
+      POSTGRES_DB: postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  backend:
+    container_name: backend
+    build:
+      context: ./backend
+    command: bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - ./backend/:/app
+      - ./backend/.env.docker:/app/.env
+      - ./backend/logs:/app/logs
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./backend/.env.dev
+    depends_on:
+      - postgres
+
+  frontend:
+    container_name: web
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    volumes:
+      - ./frontend:/app
+      - ./frontend/.env.example:/app/.env
+    depends_on:
+      - backend
+    ports:
+      - "5173:5173"
+
+volumes:
+  pgdata:
+  media:
+  static:
